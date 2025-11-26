@@ -52,23 +52,23 @@ def count_atoms_in_molecule(molecular_formula):
     return my_dict
 
 
-   def parse_chemical_reaction(reaction_equation): # Step 1: Initialize an empty dictionary to store atom counts
+   def parse_chemical_reaction(reaction_equation):
+    if "->" in reaction_equation:
+        reactants_part, products_part = reaction_equation.split("->")
+    elif "=" in reaction_equation:
+        reactants_part, products_part = reaction_equation.split("=")
+    else:
+        raise ValueError("לא נמצא מפריד תקני בתגובה (-> או =).")
 
-    for atom in split_by_capitals(molecular_formula):
-        atom_name, atom_count = split_at_number(atom)
+    reactants = [mol.strip() for mol in reactants_part.split("+")]
+    products = [mol.strip() for mol in products_part.split("+")]
+
+    reactants_counts = [count_atoms_in_molecule(mol) for mol in reactants]
+    products_counts = [count_atoms_in_molecule(mol) for mol in products]
+
+    return reactants_counts, products_counts
+
         
-        # Step 2: Update the dictionary with the atom name and count
-
-    # Step 3: Return the completed dictionary
-
-
-
-def parse_chemical_reaction(reaction_equation):
-    """Takes a reaction equation (string) and returns reactants and products as lists.  
-    Example: 'H2 + O2 -> H2O' → (['H2', 'O2'], ['H2O'])"""
-    reaction_equation = reaction_equation.replace(" ", "")  # Remove spaces for easier parsing
-    reactants, products = reaction_equation.split("->")
-    return reactants.split("+"), products.split("+")
 
 def count_atoms_in_reaction(molecules_list):
     """Takes a list of molecular formulas and returns a list of atom count dictionaries.  
