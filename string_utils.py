@@ -52,7 +52,7 @@ def count_atoms_in_molecule(molecular_formula):
     return my_dict
 
 
-    # Step 1: Initialize an empty dictionary to store atom counts
+   def parse_chemical_reaction(reaction_equation): # Step 1: Initialize an empty dictionary to store atom counts
 
     for atom in split_by_capitals(molecular_formula):
         atom_name, atom_count = split_at_number(atom)
