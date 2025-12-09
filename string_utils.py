@@ -1,53 +1,55 @@
 def split_before_uppercases(formula):
-    if not formula:
-        return []
-    splitted_formula = []
-    start = 0
-    for i in range(1, len(formula)):
-        if formula[i].isupper():
-            splitted_formula.append(formula[start:i])
-            start = i
-    splitted_formula.append(formula[start:])
-    return splitted_formula
+    t = []
+    splited_formula = []
+
+    for char in formula:
+        if char.isupper():
+            if t:  # only append if t is not empty
+                splited_formula.append(''.join(t))
+            t = [char]
+        else:
+            t.append(char)
+
+    if t:  # append the last chunk after the loop
+        splited_formula.append(''.join(t))
+
+    return splited_formula
 
 def split_at_digit(formula):
-    if not formula:
-        return "", 1
-    for i, ch in enumerate(formula):
-        if ch.isdigit():
-            j = i
-            while j < len(formula) and formula[j].isdigit():
-                j += 1
-            prefix = formula[:i]
-            number_part = int(formula[i:j])
-            return prefix, number_part
-    return formula, 1
+    digits = []
+    letters = []
+    for char in formula:
+        if char.isdigit():
+            digits.append(char)
+        else:
+            letters.append(char)
+    if digits == []:
+        digits.append("1")
+    return ''.join(letters), int(''.join(digits))
 
 def count_atoms_in_molecule(molecular_formula):
-    my_dict = {}
-    splitted_formula = split_before_uppercases(molecular_formula)
-    for formula in splitted_formula:
-        prefix, number_part = split_at_digit(formula)
-        if prefix in my_dict:
-            my_dict[prefix] += number_part
-        else:
-            my_dict[prefix] = number_part
-    return my_dict
+  count = {}
+  splited_formula = split_before_uppercases(molecular_formula)
+  for atom in splited_formula:
+    element,amount = split_at_digit(atom)
+    if element in count:
+      count[element] += amount
+    else:
+      count[element] = amount
+
+  return count
+
 
 def parse_chemical_reaction(reaction_equation):
-    if "->" in reaction_equation:
-        reactants_part, products_part = reaction_equation.split("->")
-    elif "=" in reaction_equation:
-        reactants_part, products_part = reaction_equation.split("=")
-    else:
-        raise ValueError("לא נמצא מפריד תקני בתגובה (-> או =).")
-    reactants = [mol.strip() for mol in reactants_part.split("+")]
-    products = [mol.strip() for mol in products_part.split("+")]
-    reactants_counts = [count_atoms_in_molecule(mol) for mol in reactants]
-    products_counts = [count_atoms_in_molecule(mol) for mol in products]
-    return reactants_counts, products_counts
+    """Takes a reaction equation (string) and returns reactants and products as lists.  
+    Example: 'H2 + O2 -> H2O' → (['H2', 'O2'], ['H2O'])"""
+    reaction_equation = reaction_equation.replace(" ", "")  # Remove spaces for easier parsing
+    reactants, products = reaction_equation.split("->")
+    return reactants.split("+"), products.split("+")
 
 def count_atoms_in_reaction(molecules_list):
+    """Takes a list of molecular formulas and returns a list of atom count dictionaries.  
+    Example: ['H2', 'O2'] → [{'H': 2}, {'O': 2}]"""
     molecules_atoms_count = []
     for molecule in molecules_list:
         molecules_atoms_count.append(count_atoms_in_molecule(molecule))
