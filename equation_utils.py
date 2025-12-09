@@ -1,5 +1,8 @@
 from sympy import Eq, symbols, solve
+from fractions import Fraction
+from string_utils import split_before_uppercases, split_at_digit, count_atoms_in_molecule, parse_chemical_reaction, count_atoms_in_reaction
 
+# רשימת כל היסודות
 ELEMENTS = [
     'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',
     'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca',
@@ -15,6 +18,7 @@ ELEMENTS = [
     'Rg', 'Cn', 'Uut', 'Uuq', 'Uup', 'Uuh', 'Uus', 'Uuo'
 ]
 
+# יוצר משוואה עבור יסוד מסוים
 def generate_equation_for_element(compounds, coefficients, element):
     equation = 0
     for i, compound in enumerate(compounds):
@@ -22,12 +26,12 @@ def generate_equation_for_element(compounds, coefficients, element):
             equation += coefficients[i] * compound[element]
     return equation
 
-
+# בונה את כל המשוואות של התגובה
 def build_equations(reactant_atoms, product_atoms):
     reactant_coefficients = list(symbols(f'a0:{len(reactant_atoms)}'))
     product_coefficients = list(symbols(f'b0:{len(product_atoms)}'))
 
-    # last product coefficient fixed to 1
+    # קובע את המקדם האחרון של המוצרים ל-1
     product_coefficients = product_coefficients[:-1] + [1]
 
     equations = []
@@ -39,12 +43,21 @@ def build_equations(reactant_atoms, product_atoms):
 
     return equations, reactant_coefficients + product_coefficients
 
-
+# פותר את המשוואות ומחזיר רשימה של Fractions
 def my_solve(equations, coefficients):
     solution_list = solve(equations, coefficients)
+    solution = solution_list[0]  # solve מחזיר רשימה של מילון, לוקחים את הראשון
+    return [Fraction(solution[c].p, solution[c].q) for c in coefficients]
 
-    # solve returns a list of dicts → take the first dict
-    solution = solution_list[0]
+# פונקציה ראשית לאיזון תגובה
+def balance_reaction(reaction):
+    # 1. פירוק התגובה למוצרים וריאקטנטים
+    reactants, products = parse_chemical_reaction(reaction)
+    reactant_atoms = count_atoms_in_reaction(reactants)
+    product_atoms = count_atoms_in_reaction(products)
 
-    # return list in the same order, with exact rational numbers
-    return [solution[c] for c in coefficients]
+    # 2. בניית המשוואות ופתרונן
+    equations, coefficients = build_equations(reactant_atoms, product_atoms)
+    ordered_solution = my_solve(equations, coefficients)
+
+    return ordered_solution
