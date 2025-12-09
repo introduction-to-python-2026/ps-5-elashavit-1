@@ -25,8 +25,10 @@ def generate_equation_for_element(compounds, coefficients, element):
 
 def build_equations(reactant_atoms, product_atoms):
     reactant_coefficients = list(symbols(f'a0:{len(reactant_atoms)}'))
-    product_coefficients = list(symbols(f'b0:{len(product_atoms)}')) 
-    product_coefficients = product_coefficients[:-1] + [1]  # fix last product coefficient
+    product_coefficients = list(symbols(f'b0:{len(product_atoms)}'))
+
+    # last product coefficient fixed to 1
+    product_coefficients = product_coefficients[:-1] + [1]
 
     equations = []
     for element in ELEMENTS:
@@ -35,20 +37,14 @@ def build_equations(reactant_atoms, product_atoms):
         if lhs != 0 or rhs != 0:
             equations.append(Eq(lhs, rhs))
 
-    
     return equations, reactant_coefficients + product_coefficients
 
 
 def my_solve(equations, coefficients):
-    solution = solve(equations, coefficients)
+    solution_list = solve(equations, coefficients)
 
-    if len(solution) == len(coefficients):
-        coefficient_values = []
-        for coefficient in coefficients:
-            coefficient_values.append(float(solution[coefficient]))
-        return coefficient_values
+    # solve returns a list of dicts → take the first dict
+    solution = solution_list[0]
 
-
-
-
-
+    # return list in the same order, with exact rational numbers
+    return [solution[c] for c in coefficients]
